@@ -17,6 +17,7 @@
 #include <QStatusBar>
 #include <QPlainTextEdit>
 #include <QComboBox>
+#include <QSystemTrayIcon>
 
 #include "ui/TreeModel.hpp"
 #include "ui/StoreTreeModel.hpp"
@@ -44,6 +45,7 @@ public:
   QTreeWidget* processTreeWidget;
   QLineEdit* selectedProcessLine;
   QStatusBar* statusBar;
+  QSystemTrayIcon* trayIcon;
   QComboBox* scanTypeCombo;
   QTreeView* scanTreeView;
   QTreeView* storeTreeView;
@@ -71,6 +73,7 @@ public:
   std::mutex storeUpdateMutex;
 
   void setWindowTitle();
+  void displayTrayAlert(const string& title, const string& body);
   void openFile(QString filename);
   void updateNumberOfAddresses();
 
@@ -132,6 +135,7 @@ private:
   void loadProcessUi();
   void loadMemEditor();
   void setupStatusBar();
+  void setupTrayIcon();
   void setupScanTreeView();
   void setupStoreTreeView();
   void setupSignals();

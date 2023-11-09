@@ -33,6 +33,7 @@ MedUi::MedUi(QApplication* app) {
   setupStoreTreeView();
   setupSignals();
   setupUi();
+  setupTrayIcon();
 
   encodingManager = new EncodingManager(this);
   setScanState(UiState::Idle);
@@ -116,6 +117,11 @@ void MedUi::setupStatusBar() {
   //Statusbar message
   statusBar = mainWindow->findChild<QStatusBar*>("statusbar");
   statusBar->showMessage("Tips: Left panel is scanned address. Right panel is stored address.");
+}
+
+void MedUi::setupTrayIcon() {
+  trayIcon = new QSystemTrayIcon(QIcon::fromTheme("utilities-system-monitor"), app);
+  trayIcon->show();
 }
 
 void MedUi::setupSignals() {
@@ -335,6 +341,16 @@ string MedUi::getLastDigit() {
   return mainWindow->findChild<QLineEdit*>("lastDigit")->text().toStdString();
 }
 
+void MedUi::displayTrayAlert(const string& title, const string& body) {
+  //trayIcon->show();
+  trayIcon->showMessage(
+    QString::fromStdString(title),
+    QString::fromStdString(body),
+    QSystemTrayIcon::Information,
+    3000 /*milliseconds*/);
+  //trayIcon->hide();
+}
+
 void MedUi::onScanClicked() {
   if(med->selectedProcess.pid == "") {
     statusBar->showMessage("No process selected");
@@ -376,6 +392,11 @@ void MedUi::onScanClicked() {
     statusBar->showMessage("Snapshot saved");
   }
   updateNumberOfAddresses();
+
+  ostringstream body;
+  body << "Found " << med->getScans().size() << " matching addresses.";
+  displayTrayAlert("Scan concluded.", body.str());
+
   if (!med->getIsProcessPaused() && med->getCanResumeProcess()) {
     med->resumeProcess();
   }
