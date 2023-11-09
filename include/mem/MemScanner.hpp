@@ -31,7 +31,7 @@ public:
                       const ScanParser::OpType& op,
                       bool fastScan = false,
                       Integers lastDigits = Integers());
-  vector<MemPtr> scan(ScanCommand &scanCommand, Integers lastDigits = Integers(), bool fastScan = true);
+  vector<MemPtr> scan(ScanCommand &scanCommand, Integers lastDigits = Integers(), bool fastScan = true, ProgressKeeper* progress = nullptr);
   vector<MemPtr> filter(const vector<MemPtr>& list,
                         Operands& operands,
                         int size,
@@ -88,7 +88,7 @@ private:
                             const ScanParser::OpType& op,
                             bool fastScan = false,
                             Integers lastDigits = Integers());
-  vector<MemPtr> scanByMaps(ScanCommand &scanCommand, Integers lastDigits = Integers(), bool fastScan = false);
+  vector<MemPtr> scanByMaps(ScanCommand &scanCommand, Integers lastDigits = Integers(), bool fastScan = false, ProgressKeeper* progress = nullptr);
 
   static void scanMap(ScanParams params);
   static void scanMap(MemIO* memio,

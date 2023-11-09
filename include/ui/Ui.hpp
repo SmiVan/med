@@ -17,6 +17,7 @@
 #include <QStatusBar>
 #include <QPlainTextEdit>
 #include <QComboBox>
+#include <QProgressBar>
 
 #include "ui/TreeModel.hpp"
 #include "ui/StoreTreeModel.hpp"
@@ -138,6 +139,8 @@ private:
   void setupUi();
 
   string getLastDigit();
+
+  ProgressKeeper makeProgressKeeper(QProgressBar* progressBar);
 
   QApplication* app;
   UiState scanState;

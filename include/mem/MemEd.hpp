@@ -20,7 +20,7 @@ public:
   ~MemEd();
   void setPid(pid_t pid);
   pid_t getPid();
-  vector<MemPtr> scan(const string& value, const string& scanType, bool fastScan = false, const string& lastDigit = "");
+  vector<MemPtr> scan(const string& value, const string& scanType, bool fastScan = false, const string& lastDigit = "", ProgressKeeper* progress = nullptr);
   vector<MemPtr> filter(const string& value, const string& scanType, bool fastScan = false);
   NamedScans& getNamedScans();
   MemList getScans();

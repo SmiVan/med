@@ -134,8 +134,8 @@ vector<MemPtr> MemScanner::scan(Operands& operands,
   return scanByMaps(operands, size, scanType, op, fastScan, lastDigits);
 }
 
-vector<MemPtr> MemScanner::scan(ScanCommand &scanCommand, Integers lastDigits, bool fastScan) {
-  return scanByMaps(scanCommand, lastDigits, fastScan);
+vector<MemPtr> MemScanner::scan(ScanCommand &scanCommand, Integers lastDigits, bool fastScan, ProgressKeeper* progress) {
+  return scanByMaps(scanCommand, lastDigits, fastScan, progress);
 }
 
 vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
@@ -188,7 +188,7 @@ vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
   return list;
 }
 
-vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand, Integers lastDigits, bool fastScan) {
+vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand, Integers lastDigits, bool fastScan, ProgressKeeper* progress) {
   vector<MemPtr> list;
 
   Maps maps = getMaps(pid);
@@ -198,13 +198,20 @@ vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand, Integers lastDig
   int memFd = getMem(pid);
   MemIO* memio = getMemIO();
 
+  if(progress) {
+    progress->prepare(progress, maps.size());
+  }
+
   auto& mutex = listMutex;
   std::mutex fdMutex;
 
   for (size_t i = 0; i < maps.size(); i++) {
     TMTask* fn = new TMTask();
-    *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, &scanCommand, lastDigits, fastScan]() {
+    *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, &scanCommand, lastDigits, fastScan, &progress]() {
       scanMap(memio, mutex, list, maps, i, memFd, fdMutex, scanCommand, lastDigits, fastScan);
+      if(progress) {
+        progress->consume(progress);
+      }
     };
     threadManager->queueTask(fn);
   }

@@ -48,7 +48,7 @@ pid_t MemEd::getPid() {
   return pid;
 }
 
-vector<MemPtr> MemEd::scan(const string& value, const string& scanType, bool fastScan, const string& lastDigit) {
+vector<MemPtr> MemEd::scan(const string& value, const string& scanType, bool fastScan, const string& lastDigit, ProgressKeeper* progress) {
   if (!ScanParser::isValid(value)) {
     throw MedException("Invalid scan string");
   }
@@ -61,7 +61,7 @@ vector<MemPtr> MemEd::scan(const string& value, const string& scanType, bool fas
     scanner->saveSnapshot(store->getList());
   } else {
     ScanCommand scanCommand = ScanParser::getScanCommand(value, scanType);
-    mems = scanner->scan(scanCommand, lastDigitValues, fastScan);
+    mems = scanner->scan(scanCommand, lastDigitValues, fastScan, progress);
   }
   namedScans.setMemPtrs(mems, scanType);
   return mems;

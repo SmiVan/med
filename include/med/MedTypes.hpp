@@ -67,4 +67,11 @@ namespace ScanParser {
 
 typedef vector<int> Integers;
 
+struct ProgressKeeper {
+  void* data;
+  mutex lock;
+  void (*prepare)(ProgressKeeper* self, int max);
+  void (*consume)(ProgressKeeper* self);
+};
+
 #endif

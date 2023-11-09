@@ -335,6 +335,21 @@ string MedUi::getLastDigit() {
   return mainWindow->findChild<QLineEdit*>("lastDigit")->text().toStdString();
 }
 
+ProgressKeeper MedUi::makeProgressKeeper(QProgressBar* progressBar) {
+  return {
+    .data = progressBar,
+    .prepare = [](ProgressKeeper* self, int max) {
+      ((QProgressBar*)self->data)->setEnabled(true);
+      ((QProgressBar*)self->data)->setRange(0, max);
+      ((QProgressBar*)self->data)->setValue(0);
+    },
+    .consume = [](ProgressKeeper* self) {
+      lock_guard<mutex> guard(self->lock);
+      ((QProgressBar*)self->data)->setValue(((QProgressBar*)self->data)->value() + 1);
+    }
+  };
+}
+
 void MedUi::onScanClicked() {
   if(med->selectedProcess.pid == "") {
     statusBar->showMessage("No process selected");
@@ -355,15 +370,21 @@ void MedUi::onScanClicked() {
   scanModel->clearAll();
   scanUpdateMutex->unlock();
 
+  QProgressBar* progressBar = mainWindow->findChild<QProgressBar*>("progress");
+  ProgressKeeper progressKeeper = makeProgressKeeper(progressBar);
+
   try {
-    med->scan(scanValue, scanType, fastScan, getLastDigit());
+    med->scan(scanValue, scanType, fastScan, getLastDigit(), &progressKeeper);
   } catch(EmptyListException &ex) {
+    progressBar->setEnabled(false);
     statusBar->showMessage(ex.what());
     cerr << ex.what() << endl;
     return;
   } catch(MedException &ex) {
     cerr << "scan: "<< ex.what() << endl;
   }
+
+  progressBar->setEnabled(false);
 
   if(med->getScans().size() <= SCAN_ADDRESS_VISIBLE_SIZE) {
     scanUpdateMutex->lock();
